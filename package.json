@@ -1,0 +1,22 @@
+{
+    "name": "maia-ethereum",
+    "version": "0.0.1",
+    "repository": {
+        "type": "git",
+        "url": "http://github.com/withmaia/maia-ethereum.git"
+    },
+    "main": "lib/index.js",
+    "scripts": {
+        "build": "cjsx --bare -o lib -c src"
+    },
+    "keywords": [
+        "ethereum",
+        "service",
+        "distributed",
+        "iot"
+    ],
+    "dependencies": {
+        "eve-node": "0.0.5",
+        "somata": "0.2.x"
+    }
+}
