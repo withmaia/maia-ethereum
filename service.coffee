@@ -1,23 +1,21 @@
+config = require './config'
+eve = require('eve-node')({eth_addresses: [config.oracle_address]})
 fs = require 'fs'
 somata = require 'somata'
-client = new somata.Client
 
-Hue = client.remote.bind client, 'maia:hue'
-
-config = require './config'
-
-{lock_address} = config
-eve = require('eve-node')({eth_addresses: [config.oracle_address]})
-
-contract_schema = {
+# Configure contract interface
+contract_schema =
     'DoorLock': fs.readFileSync("./contracts/door-lock.sol").toString()
-}
-
 {abis, contracts, decodeEvent, callFunction} = eve.buildGenericMethods contract_schema
 
+# Set up local services
+client = new somata.Client
+Hue = client.remote.bind client, 'maia:hue'
+
+# Helper for subscribing and translating Contract events
 subscribeContract = (address, fn) ->
     eve.web3.eth.getBlockNumber (err, fromBlock) ->
-        filter = eve.web3.eth.filter({fromBlock, toBlock: 'latest', lock_address})
+        filter = eve.web3.eth.filter({fromBlock, toBlock: 'latest', address})
         filter.watch fn
 
 handleEvent = (err, filter_result) ->
@@ -34,8 +32,9 @@ handleEvent = (err, filter_result) ->
         # LockService 'unlock', ...
         Hue 'setState', 1, {on: true, hue: 120, sat: 120, bri: 255}, (err, resp) ->
 
-subscribeContract lock_address, handleEvent
+subscribeContract config.lock_address, handleEvent
 
+# Export the opener function
 service = new somata.Service 'maia:ethereum', {
 
     unlockDoor: (commander, cb) ->
